@@ -77,11 +77,8 @@ public class Scanner {
                 addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
                 break;
             case '/':
-                if (match('/')) {
-                    while (peek() != '\n' && !isAtEnd()) {
-                        advance();
-                    }
-                }
+                comment();
+                break;
             case ' ':
             case '\r':
             case '\t':
@@ -105,6 +102,18 @@ public class Scanner {
                 } else {
                     throw new LexerException(line, "Unexpected character.");
                 }
+        }
+    }
+
+    private void comment() {
+        if (match('/')) {
+            while (peek() != '\n' && !isAtEnd()) {
+                advance();
+            }
+        } else if (match('*')) {
+            while (!match('*') && peek() != '/' && !isAtEnd()) {
+                advance();
+            }
         }
     }
 
