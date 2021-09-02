@@ -1,26 +1,32 @@
 package jlox.lexer;
 
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Scanner {
     private String source;
-    private List<Token> tokens;
+    private List<Token> tokens = new LinkedList<>();
     private int start = 0;
     private int current = 0;
     private int line = 1;
+    private Map<String, TokenType> keywords;
 
     public Scanner(String source) {
         this.source = source;
+        keywords = buildKeywordsMap();
     }
 
-    public List<jlox.lexer.Token> scanTokens() {
+    public List<Token> scanTokens() {
         while (!isAtEnd()) {
             start = current;
             scanToken();
         }
 
-        tokens.add(new jlox.lexer.Token(TokenType.EOF, "", null, line));
+        tokens.add(new Token(TokenType.EOF, "", null, line));
         return tokens;
     }
 
@@ -86,13 +92,77 @@ public class Scanner {
             case '"':
                 string();
                 break;
+            case 'o':
+                if (match('r')) {
+                    addToken(TokenType.OR);
+                }
+                break;
             default:
-                throw new LexerException(line, "Unexpected character.");
+                if (isDigit(c)) {
+                    number();
+                } else if (isAlpha(c)) {
+                    identifier();
+                } else {
+                    throw new LexerException(line, "Unexpected character.");
+                }
         }
     }
 
+    private void identifier() {
+        while (isAlphaNumeric(peek())) {
+            advance();
+        }
+
+        String text = source.substring(start, current);
+        TokenType type = keywords.get(text);
+
+        if (type == null) {
+            type = TokenType.IDENTIFIER;
+        }
+
+        addToken(type);
+    }
+
+    private boolean isAlphaNumeric(char c) {
+        return isAlpha(c) || isDigit(c);
+    }
+
+    private boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                c == '_';
+    }
+
+    private void number() {
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            advance();
+
+            while (isDigit(peek())) {
+                advance();
+            }
+        }
+
+        addToken(TokenType.NUMBER, Double.parseDouble(source.substring(start, current)));
+    }
+
+    private char peekNext() {
+        if (current + 1 >= source.length()) {
+            return '\0';
+        }
+
+        return source.charAt(current + 1);
+    }
+
+    private boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
     private void string() {
-        while (peek() != '\n' && !isAtEnd()) {
+        while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
                 line++;
             }
@@ -145,5 +215,26 @@ public class Scanner {
 
     private boolean isAtEnd() {
         return current >= source.length();
+    }
+
+    private Map<String, TokenType> buildKeywordsMap() {
+        return new ImmutableMap.Builder<String, TokenType>()
+                .put("and", TokenType.AND)
+                .put("class", TokenType.CLASS)
+                .put("else", TokenType.ELSE)
+                .put("false", TokenType.FALSE)
+                .put("for", TokenType.FOR)
+                .put("fun", TokenType.FUN)
+                .put("if", TokenType.IF)
+                .put("nil", TokenType.NIL)
+                .put("or", TokenType.OR)
+                .put("print", TokenType.PRINT)
+                .put("return", TokenType.RETURN)
+                .put("super", TokenType.SUPER)
+                .put("this", TokenType.THIS)
+                .put("true", TokenType.TRUE)
+                .put("var", TokenType.VAR)
+                .put("while", TokenType.WHILE)
+                .build();
     }
 }
