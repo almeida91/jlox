@@ -1,6 +1,6 @@
 package jlox.lexer;
 
-public class LexerException extends RuntimeException{
+public class LexerException extends RuntimeException {
 
     private int line;
 

@@ -1,5 +1,8 @@
 package jlox;
 
+import jlox.ast.AstPrinter;
+import jlox.ast.Expression;
+import jlox.ast.Parser;
 import jlox.lexer.Scanner;
 import jlox.lexer.Token;
 
@@ -46,8 +49,10 @@ public class Lox {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+        Parser parser = new Parser(tokens);
+        Expression expression = parser.parse();
+
+        AstPrinter printer = new AstPrinter();
+        System.out.println(expression.accept(printer));
     }
 }

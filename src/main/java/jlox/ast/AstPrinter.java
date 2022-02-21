@@ -4,7 +4,6 @@ import jlox.ast.expressions.*;
 import jlox.lexer.Token;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class AstPrinter implements ExpressionVisitor<String> {
 
