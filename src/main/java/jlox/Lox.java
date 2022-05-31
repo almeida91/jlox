@@ -3,6 +3,7 @@ package jlox;
 import jlox.ast.AstPrinter;
 import jlox.ast.Expression;
 import jlox.ast.Parser;
+import jlox.interpreter.Interpreter;
 import jlox.lexer.Scanner;
 import jlox.lexer.Token;
 
@@ -52,7 +53,7 @@ public class Lox {
         Parser parser = new Parser(tokens);
         Expression expression = parser.parse();
 
-        AstPrinter printer = new AstPrinter();
-        System.out.println(expression.accept(printer));
+        Interpreter interpreter = new Interpreter();
+        interpreter.interpret(expression);
     }
 }
