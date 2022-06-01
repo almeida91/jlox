@@ -4,9 +4,12 @@ import jlox.ast.expressions.Binary;
 import jlox.ast.expressions.Grouping;
 import jlox.ast.expressions.Literal;
 import jlox.ast.expressions.Unary;
+import jlox.ast.statements.ExpressionStatement;
+import jlox.ast.statements.PrintStatement;
 import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class Parser {
@@ -18,12 +21,34 @@ public class Parser {
         this.tokens = tokens;
     }
 
-    public Expression parse() {
-        try {
-            return expression();
-        } catch (ParserException exception) {
-            return null;
+    public List<Statement> parse() {
+        List<Statement> statements = new LinkedList<>();
+
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+
+        return statements;
+    }
+
+    private Statement statement() {
+        if (match(TokenType.PRINT)) {
+            return printStatement();
+        }
+
+        return expressionStatement();
+    }
+
+    private Statement expressionStatement() {
+        Expression expression = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new ExpressionStatement(expression);
+    }
+
+    private Statement printStatement() {
+        Expression expression = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new PrintStatement(expression);
     }
 
     private Expression expression() {

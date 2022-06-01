@@ -3,10 +3,16 @@ package jlox.interpreter;
 import jlox.MessagePrinter;
 import jlox.ast.Expression;
 import jlox.ast.ExpressionVisitor;
+import jlox.ast.Statement;
+import jlox.ast.StatementVisitor;
 import jlox.ast.expressions.*;
+import jlox.ast.statements.ExpressionStatement;
+import jlox.ast.statements.PrintStatement;
 import jlox.lexer.Token;
 
-public class Interpreter implements ExpressionVisitor<Object> {
+import java.util.List;
+
+public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<Void> {
 
     public void interpret(Expression expression) {
         try {
@@ -15,6 +21,19 @@ public class Interpreter implements ExpressionVisitor<Object> {
         } catch (InterpreterException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    public void interpret(List<Statement> statements) {
+        try {
+            statements.forEach(this::execute);
+        } catch (InterpreterException ex) {
+            // TODO: error handling
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void execute(Statement statement) {
+        statement.accept(this);
     }
 
     @Override
@@ -137,6 +156,19 @@ public class Interpreter implements ExpressionVisitor<Object> {
 
     @Override
     public Object visitVariable(Variable expression) {
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStatement(PrintStatement statement) {
+        Object value = evaluate(statement.getExpression());
+        System.out.println(stringfy(value));
+        return null;
+    }
+
+    @Override
+    public Void visitExpressionStatement(ExpressionStatement statement) {
+        evaluate(statement.getExpression());
         return null;
     }
 
