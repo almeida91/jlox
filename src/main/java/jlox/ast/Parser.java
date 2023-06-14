@@ -73,8 +73,26 @@ public class Parser {
         return new VariableStatement(name, initializer);
     }
 
+    private Expression assignment() {
+        Expression expression = equality();
+
+        if (match(TokenType.EQUAL)) {
+            Token equals = previous();
+            Expression value = assignment();
+
+            if (expression instanceof Variable) {
+                Token name = ((Variable)expression).getName();
+                return new Assign(name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expression;
+    }
+
     private Expression expression() {
-        return equality();
+        return assignment();
     }
 
     private Expression equality() {

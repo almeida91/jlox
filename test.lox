@@ -1,2 +1,4 @@
 var a = "aaaa";
 print(a);
+a = "bbbb";
+print(a);

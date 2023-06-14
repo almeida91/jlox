@@ -40,7 +40,9 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Object visitAssign(Assign expression) {
-        return null;
+        Expression value = expression.getValue();
+        environment.put(expression.getName(), evaluate(value));
+        return value;
     }
 
     @Override

@@ -12,13 +12,23 @@ public class Environment {
         values.put(name, value);
     }
 
-    Object get(Token name) {
-        String lexeme = name.getLexeme();
+    public Object get(Token name) {
+        String varName = name.getLexeme();
 
-        if (values.containsKey(lexeme)) {
-            return values.get(lexeme);
+        if (values.containsKey(varName)) {
+            return values.get(varName);
         }
 
-        throw new InterpreterException(name, String.format("Undefined variable '%s'.", lexeme));
+        throw new InterpreterException(name, String.format("Undefined variable '%s'.", varName));
+    }
+
+    public void put(Token name, Object value) {
+        String varName = name.getLexeme();
+
+        if (!values.containsKey(varName)) {
+            throw new InterpreterException(name, String.format("Undefined variable '%s'.", varName));
+        }
+
+        values.put(varName, value);
     }
 }
