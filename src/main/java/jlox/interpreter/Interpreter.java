@@ -8,6 +8,7 @@ import jlox.ast.StatementVisitor;
 import jlox.ast.expressions.*;
 import jlox.ast.statements.ExpressionStatement;
 import jlox.ast.statements.PrintStatement;
+import jlox.ast.statements.VariableStatement;
 import jlox.lexer.Token;
 
 import java.util.List;
@@ -169,6 +170,11 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     @Override
     public Void visitExpressionStatement(ExpressionStatement statement) {
         evaluate(statement.getExpression());
+        return null;
+    }
+
+    @Override
+    public Void visitVariableStatement(VariableStatement statement) {
         return null;
     }
 

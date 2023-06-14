@@ -1,11 +1,9 @@
 package jlox.ast;
 
-import jlox.ast.expressions.Binary;
-import jlox.ast.expressions.Grouping;
-import jlox.ast.expressions.Literal;
-import jlox.ast.expressions.Unary;
+import jlox.ast.expressions.*;
 import jlox.ast.statements.ExpressionStatement;
 import jlox.ast.statements.PrintStatement;
+import jlox.ast.statements.VariableStatement;
 import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
@@ -25,10 +23,22 @@ public class Parser {
         List<Statement> statements = new LinkedList<>();
 
         while (!isAtEnd()) {
-            statements.add(statement());
+            statements.add(declaration());
         }
 
         return statements;
+    }
+
+    private Statement declaration() {
+        try {
+            if (match(TokenType.VAR)) {
+                return variableDeclaration();
+            }
+            return statement();
+        } catch (ParserException ex) {
+            synchronize();
+            return null;
+        }
     }
 
     private Statement statement() {
@@ -49,6 +59,18 @@ public class Parser {
         Expression expression = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new PrintStatement(expression);
+    }
+
+    private Statement variableDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+        Expression initializer = null;
+        if (match(TokenType.EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        return new VariableStatement(name, initializer);
     }
 
     private Expression expression() {
@@ -127,6 +149,10 @@ public class Parser {
 
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Literal(previous().getLiteral());
+        }
+
+        if (match(TokenType.IDENTIFIER)) {
+            return new Variable(previous());
         }
 
         if (match(TokenType.LEFT_PAREN)) {

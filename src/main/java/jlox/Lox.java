@@ -1,7 +1,5 @@
 package jlox;
 
-import jlox.ast.AstPrinter;
-import jlox.ast.Expression;
 import jlox.ast.Parser;
 import jlox.ast.Statement;
 import jlox.interpreter.Interpreter;
