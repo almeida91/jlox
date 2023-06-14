@@ -13,7 +13,7 @@ public class VariableStatement implements Statement {
 
     private Token name;
 
-    private Expression value;
+    private Expression initializer;
 
     @Override
     public <T> T accept(StatementVisitor<T> visitor) {

@@ -1,6 +1,5 @@
 package jlox.interpreter;
 
-import jlox.MessagePrinter;
 import jlox.ast.Expression;
 import jlox.ast.ExpressionVisitor;
 import jlox.ast.Statement;
@@ -14,6 +13,8 @@ import jlox.lexer.Token;
 import java.util.List;
 
 public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<Void> {
+
+    private Environment environment = new Environment();
 
     public void interpret(Expression expression) {
         try {
@@ -157,7 +158,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Object visitVariable(Variable expression) {
-        return null;
+        return environment.get(expression.getName());
     }
 
     @Override
@@ -175,6 +176,14 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Void visitVariableStatement(VariableStatement statement) {
+        Object value = null;
+
+        if (statement.getInitializer() != null) {
+            value = evaluate(statement.getInitializer());
+        }
+
+        environment.define(statement.getName().getLexeme(), value);
+
         return null;
     }
 
