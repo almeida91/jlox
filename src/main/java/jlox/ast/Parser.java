@@ -6,6 +6,7 @@ import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,6 +42,10 @@ public class Parser {
     }
 
     private Statement statement() {
+        if (match(TokenType.FOR)) {
+            return forStatement();
+        }
+
         if (match(TokenType.PRINT)) {
             return printStatement();
         }
@@ -60,10 +65,57 @@ public class Parser {
         return expressionStatement();
     }
 
+    private Statement forStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+
+        Statement initializer;
+
+        if (match(TokenType.SEMICOLON)) {
+            initializer = null;
+        } else if (match(TokenType.VAR)) {
+            initializer = variableDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
+
+        Expression condition = null;
+
+        if (!check(TokenType.SEMICOLON)) {
+            condition = expression();
+        }
+        consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+        Expression increment = null;
+
+        if (!check(TokenType.RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+        Statement body = statement();
+
+        // Appends the increment into the end of the code
+        if (increment != null) {
+            ExpressionStatement incrementStatement = new ExpressionStatement(increment);
+            body = new Block(Arrays.asList(body, incrementStatement));
+        }
+
+        if (condition == null) {
+            condition = new Literal(true);
+        }
+        body = new WhileStatement(condition, body);
+
+        if (initializer != null) {
+            body = new Block(Arrays.asList(initializer, body));
+        }
+
+        return body;
+    }
+
     private Statement whileStatement() {
-        consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
         Expression condition = expression();
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition");
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition.");
 
         Statement body = statement();
 
@@ -71,9 +123,9 @@ public class Parser {
     }
 
     private Statement ifStatement() {
-        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'");
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
         Expression condition = expression();
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition");
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
 
         Statement thenBranch = statement();
         Statement elseBranch = null;
