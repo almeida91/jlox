@@ -9,4 +9,5 @@ public interface StatementVisitor<T> {
     T visitVariableStatement(VariableStatement statement);
     T visitBlock(Block block);
     T visitIfStatement(IfStatement statement);
+    T visitWhileStatement(WhileStatement statement);
 }

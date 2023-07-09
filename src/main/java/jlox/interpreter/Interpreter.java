@@ -192,6 +192,15 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     }
 
     @Override
+    public Void visitWhileStatement(WhileStatement statement) {
+        while (isTrue(evaluate(statement.getCondition()))) {
+            execute(statement.getBody());
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visitPrintStatement(PrintStatement statement) {
         Object value = evaluate(statement.getExpression());
         System.out.println(stringfy(value));

@@ -1,7 +1,6 @@
-var a = 1;
+var a = 3;
 
-if (a and a > 3) {
+while (a >= 1) {
     print a;
-} else {
-    print "oi";
+    a = a - 1;
 }

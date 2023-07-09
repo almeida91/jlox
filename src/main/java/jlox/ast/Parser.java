@@ -45,6 +45,10 @@ public class Parser {
             return printStatement();
         }
 
+        if (match(TokenType.WHILE)) {
+            return whileStatement();
+        }
+
         if (match(TokenType.LEFT_BRACE)) {
             return new Block(block());
         }
@@ -54,6 +58,16 @@ public class Parser {
         }
 
         return expressionStatement();
+    }
+
+    private Statement whileStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
+        Expression condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition");
+
+        Statement body = statement();
+
+        return new WhileStatement(condition, body);
     }
 
     private Statement ifStatement() {
