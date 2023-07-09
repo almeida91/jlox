@@ -7,6 +7,7 @@ import jlox.ast.StatementVisitor;
 import jlox.ast.expressions.*;
 import jlox.ast.statements.*;
 import jlox.lexer.Token;
+import jlox.lexer.TokenType;
 
 import java.util.List;
 
@@ -111,7 +112,19 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Object visitLogical(Logical expression) {
-        return null;
+        Object left = evaluate(expression.getLeft());
+
+        if (expression.getOperator().getType() == TokenType.OR) {
+            if (isTrue(left))  {
+                return left;
+            }
+        } else {
+            if (!isTrue(left)) {
+                return left;
+            }
+        }
+
+        return evaluate(expression.getRight());
     }
 
     @Override

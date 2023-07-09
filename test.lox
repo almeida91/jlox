@@ -1,6 +1,6 @@
 var a = 1;
 
-if (a) {
+if (a and a > 3) {
     print a;
 } else {
     print "oi";

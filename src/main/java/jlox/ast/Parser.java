@@ -107,7 +107,7 @@ public class Parser {
     }
 
     private Expression assignment() {
-        Expression expression = equality();
+        Expression expression = or();
 
         if (match(TokenType.EQUAL)) {
             Token equals = previous();
@@ -119,6 +119,30 @@ public class Parser {
             }
 
             error(equals, "Invalid assignment target.");
+        }
+
+        return expression;
+    }
+
+    private Expression or() {
+        Expression expression = and();
+
+        while (match(TokenType.OR)) {
+            Token operator = previous();
+            Expression right = and();
+            expression = new Logical(expression, operator, right);
+        }
+
+        return expression;
+    }
+
+    private Expression and() {
+        Expression expression = equality();
+
+        while (match(TokenType.AND)) {
+            Token operator = previous();
+            Expression right = equality();
+            expression = new Logical(expression, operator, right);
         }
 
         return expression;
