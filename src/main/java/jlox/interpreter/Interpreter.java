@@ -5,10 +5,7 @@ import jlox.ast.ExpressionVisitor;
 import jlox.ast.Statement;
 import jlox.ast.StatementVisitor;
 import jlox.ast.expressions.*;
-import jlox.ast.statements.Block;
-import jlox.ast.statements.ExpressionStatement;
-import jlox.ast.statements.PrintStatement;
-import jlox.ast.statements.VariableStatement;
+import jlox.ast.statements.*;
 import jlox.lexer.Token;
 
 import java.util.List;
@@ -167,6 +164,17 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     @Override
     public Void visitBlock(Block block) {
         executeBlock(block.getStatements(), new Environment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitIfStatement(IfStatement statement) {
+        if (isTrue(evaluate(statement.getCondition()))) {
+            execute(statement.getThenBranch());
+        } else if (statement.getElseBranch() != null) {
+            execute(statement.getElseBranch());
+        }
+
         return null;
     }
 

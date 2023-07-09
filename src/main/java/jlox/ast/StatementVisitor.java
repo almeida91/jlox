@@ -1,9 +1,6 @@
 package jlox.ast;
 
-import jlox.ast.statements.Block;
-import jlox.ast.statements.ExpressionStatement;
-import jlox.ast.statements.PrintStatement;
-import jlox.ast.statements.VariableStatement;
+import jlox.ast.statements.*;
 
 public interface StatementVisitor<T> {
 
@@ -11,4 +8,5 @@ public interface StatementVisitor<T> {
     T visitExpressionStatement(ExpressionStatement statement);
     T visitVariableStatement(VariableStatement statement);
     T visitBlock(Block block);
+    T visitIfStatement(IfStatement statement);
 }

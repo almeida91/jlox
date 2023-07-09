@@ -1,6 +1,7 @@
 var a = 1;
-{
-    var a = a + 2;
+
+if (a) {
     print a;
+} else {
+    print "oi";
 }
-print a;

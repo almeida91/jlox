@@ -1,10 +1,7 @@
 package jlox.ast;
 
 import jlox.ast.expressions.*;
-import jlox.ast.statements.Block;
-import jlox.ast.statements.ExpressionStatement;
-import jlox.ast.statements.PrintStatement;
-import jlox.ast.statements.VariableStatement;
+import jlox.ast.statements.*;
 import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
@@ -52,7 +49,26 @@ public class Parser {
             return new Block(block());
         }
 
+        if (match(TokenType.IF)) {
+            return ifStatement();
+        }
+
         return expressionStatement();
+    }
+
+    private Statement ifStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'");
+        Expression condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition");
+
+        Statement thenBranch = statement();
+        Statement elseBranch = null;
+
+        if (match(TokenType.ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new IfStatement(condition, thenBranch, elseBranch);
     }
 
     private Statement expressionStatement() {
