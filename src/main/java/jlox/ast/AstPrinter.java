@@ -1,6 +1,7 @@
 package jlox.ast;
 
 import jlox.ast.expressions.*;
+import jlox.ast.statements.Block;
 import jlox.lexer.Token;
 
 import java.util.LinkedList;

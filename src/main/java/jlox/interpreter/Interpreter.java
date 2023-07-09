@@ -5,6 +5,7 @@ import jlox.ast.ExpressionVisitor;
 import jlox.ast.Statement;
 import jlox.ast.StatementVisitor;
 import jlox.ast.expressions.*;
+import jlox.ast.statements.Block;
 import jlox.ast.statements.ExpressionStatement;
 import jlox.ast.statements.PrintStatement;
 import jlox.ast.statements.VariableStatement;
@@ -41,7 +42,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     @Override
     public Object visitAssign(Assign expression) {
         Expression value = expression.getValue();
-        environment.put(expression.getName(), evaluate(value));
+        environment.assign(expression.getName(), evaluate(value));
         return value;
     }
 
@@ -138,7 +139,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
         switch (expression.getOperator().getType()) {
             case MINUS:
                 checkNumberOperand(expression.getOperator(), right);
-                return - (double) right;
+                return -(double) right;
             case BANG:
                 return !isTrue(right);
             default:
@@ -161,6 +162,12 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
     @Override
     public Object visitVariable(Variable expression) {
         return environment.get(expression.getName());
+    }
+
+    @Override
+    public Void visitBlock(Block block) {
+        executeBlock(block.getStatements(), new Environment(environment));
+        return null;
     }
 
     @Override
@@ -187,6 +194,20 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
         environment.define(statement.getName().getLexeme(), value);
 
         return null;
+    }
+
+    private void executeBlock(List<Statement> statements, Environment blockEnvironment) {
+        Environment previous = environment;
+
+        try {
+            environment = blockEnvironment;
+
+            for (Statement statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            environment = previous;
+        }
     }
 
     private Object evaluate(Expression expression) {

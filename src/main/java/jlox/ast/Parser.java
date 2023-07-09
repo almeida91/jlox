@@ -1,12 +1,14 @@
 package jlox.ast;
 
 import jlox.ast.expressions.*;
+import jlox.ast.statements.Block;
 import jlox.ast.statements.ExpressionStatement;
 import jlox.ast.statements.PrintStatement;
 import jlox.ast.statements.VariableStatement;
 import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,6 +48,10 @@ public class Parser {
             return printStatement();
         }
 
+        if (match(TokenType.LEFT_BRACE)) {
+            return new Block(block());
+        }
+
         return expressionStatement();
     }
 
@@ -59,6 +65,17 @@ public class Parser {
         Expression expression = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new PrintStatement(expression);
+    }
+
+    private List<Statement> block() {
+        List<Statement> statements = new ArrayList<>();
+
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block");
+        return statements;
     }
 
     private Statement variableDeclaration() {

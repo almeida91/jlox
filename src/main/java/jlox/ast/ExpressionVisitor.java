@@ -1,6 +1,7 @@
 package jlox.ast;
 
 import jlox.ast.expressions.*;
+import jlox.ast.statements.Block;
 
 public interface ExpressionVisitor<T> {
     T visitAssign(Assign expression);
@@ -15,4 +16,5 @@ public interface ExpressionVisitor<T> {
     T visitThis(This expression);
     T visitUnary(Unary expression);
     T visitVariable(Variable expression);
+
 }
