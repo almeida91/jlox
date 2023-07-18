@@ -222,8 +222,15 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
                     if (loopControlStatement.getClass() == BreakStatement.class) {
                         break;
                     }
+                    if (loopControlStatement.getClass() == ContinueStatement.class) {
+                        continue;
+                    }
                 }
                 throw e;
+            } finally {
+                if (statement.getAfterBody() != null) {
+                    execute(statement.getAfterBody());
+                }
             }
         }
 
@@ -237,7 +244,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Void visitContinueStatement(ContinueStatement statement) {
-        return null;
+        throw new LoopException(statement);
     }
 
     @Override

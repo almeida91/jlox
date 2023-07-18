@@ -122,16 +122,10 @@ public class Parser {
 
         Statement body = statement();
 
-        // Appends the increment into the end of the code
-        if (increment != null) {
-            ExpressionStatement incrementStatement = new ExpressionStatement(increment);
-            body = new Block(Arrays.asList(body, incrementStatement));
-        }
-
         if (condition == null) {
             condition = new Literal(true);
         }
-        body = new WhileStatement(loopName,condition, body);
+        body = new WhileStatement(loopName,condition, body, new ExpressionStatement(increment));
 
         if (initializer != null) {
             body = new Block(Arrays.asList(initializer, body));
@@ -155,7 +149,7 @@ public class Parser {
 
         loopNames.remove(loopName);
 
-        return new WhileStatement(loopName,condition, body);
+        return new WhileStatement(loopName,condition, body, null);
     }
 
     private Statement ifStatement() {

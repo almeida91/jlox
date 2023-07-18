@@ -13,6 +13,7 @@ public class WhileStatement implements Statement {
     private String loopName;
     private Expression condition;
     private Statement body;
+    private Statement afterBody;
 
     @Override
     public <T> T accept(StatementVisitor<T> visitor) {
