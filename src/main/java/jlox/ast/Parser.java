@@ -1,12 +1,26 @@
 package jlox.ast;
 
-import jlox.ast.expressions.*;
-import jlox.ast.statements.*;
+import jlox.ast.expressions.Assign;
+import jlox.ast.expressions.Binary;
+import jlox.ast.expressions.Grouping;
+import jlox.ast.expressions.Literal;
+import jlox.ast.expressions.Logical;
+import jlox.ast.expressions.Unary;
+import jlox.ast.expressions.Variable;
+import jlox.ast.statements.Block;
+import jlox.ast.statements.BreakStatement;
+import jlox.ast.statements.ContinueStatement;
+import jlox.ast.statements.ExpressionStatement;
+import jlox.ast.statements.IfStatement;
+import jlox.ast.statements.PrintStatement;
+import jlox.ast.statements.VariableStatement;
+import jlox.ast.statements.WhileStatement;
 import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,6 +28,7 @@ public class Parser {
 
     private final List<Token> tokens;
     private int current = 0;
+    private LinkedHashSet<String> loopNames = new LinkedHashSet<>();
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -36,6 +51,7 @@ public class Parser {
             }
             return statement();
         } catch (ParserException ex) {
+            System.out.println(ex.getMessage());
             synchronize();
             return null;
         }
@@ -44,6 +60,14 @@ public class Parser {
     private Statement statement() {
         if (match(TokenType.FOR)) {
             return forStatement();
+        }
+
+        if (match(TokenType.BREAK)) {
+            return breakStatement();
+        }
+
+        if (match(TokenType.CONTINUE)) {
+            return continueStatement();
         }
 
         if (match(TokenType.PRINT)) {
@@ -66,6 +90,10 @@ public class Parser {
     }
 
     private Statement forStatement() {
+        Token forToken = previous();
+        String loopName = String.format("for_at_%d", forToken.getLine());
+        loopNames.add(loopName);
+
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
 
         Statement initializer;
@@ -103,23 +131,31 @@ public class Parser {
         if (condition == null) {
             condition = new Literal(true);
         }
-        body = new WhileStatement(condition, body);
+        body = new WhileStatement(loopName,condition, body);
 
         if (initializer != null) {
             body = new Block(Arrays.asList(initializer, body));
         }
 
+        loopNames.remove(loopName);
+
         return body;
     }
 
     private Statement whileStatement() {
+        Token whileToken = previous();
+        String loopName = String.format("while_at_%d", whileToken.getLine());
+        loopNames.add(loopName);
+
         consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
         Expression condition = expression();
         consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition.");
 
         Statement body = statement();
 
-        return new WhileStatement(condition, body);
+        loopNames.remove(loopName);
+
+        return new WhileStatement(loopName,condition, body);
     }
 
     private Statement ifStatement() {
@@ -147,6 +183,18 @@ public class Parser {
         Expression expression = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after value.");
         return new PrintStatement(expression);
+    }
+
+    private Statement breakStatement() {
+        BreakStatement breakStatement = new BreakStatement(getCurrentLoop(previous()));
+        consume(TokenType.SEMICOLON, "Expect ';' after break.");
+        return breakStatement;
+    }
+
+    private Statement continueStatement() {
+        ContinueStatement continueStatement = new ContinueStatement(getCurrentLoop(previous()));
+        consume(TokenType.SEMICOLON, "Expect ';' after continue.");
+        return continueStatement;
     }
 
     private List<Statement> block() {
@@ -339,7 +387,7 @@ public class Parser {
 
     private RuntimeException error(Token peek, String message) {
         // TODO: error reporting
-        return new ParserException(message);
+        return new ParserException(String.format("%s at line %d", message, peek.getLine()));
     }
 
     private Token previous() {
@@ -381,5 +429,9 @@ public class Parser {
         return tokens.get(current);
     }
 
+    private String getCurrentLoop(Token peek) {
+        return loopNames.stream().reduce((first, second) -> second)
+                .orElseThrow(() -> error(peek, String.format("%s outside of a loop", peek.getLexeme())));
+    }
 
 }

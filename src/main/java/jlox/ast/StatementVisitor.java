@@ -10,4 +10,6 @@ public interface StatementVisitor<T> {
     T visitBlock(Block block);
     T visitIfStatement(IfStatement statement);
     T visitWhileStatement(WhileStatement statement);
+    T visitBreakStatement(BreakStatement statement);
+    T visitContinueStatement(ContinueStatement statement);
 }

@@ -244,6 +244,8 @@ public class Scanner {
                 .put("true", TokenType.TRUE)
                 .put("var", TokenType.VAR)
                 .put("while", TokenType.WHILE)
+                .put("break", TokenType.BREAK)
+                .put("continue", TokenType.CONTINUE)
                 .build();
     }
 }

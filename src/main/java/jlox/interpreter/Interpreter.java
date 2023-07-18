@@ -4,8 +4,27 @@ import jlox.ast.Expression;
 import jlox.ast.ExpressionVisitor;
 import jlox.ast.Statement;
 import jlox.ast.StatementVisitor;
-import jlox.ast.expressions.*;
-import jlox.ast.statements.*;
+import jlox.ast.expressions.Assign;
+import jlox.ast.expressions.Binary;
+import jlox.ast.expressions.Call;
+import jlox.ast.expressions.Get;
+import jlox.ast.expressions.Grouping;
+import jlox.ast.expressions.Literal;
+import jlox.ast.expressions.Logical;
+import jlox.ast.expressions.Set;
+import jlox.ast.expressions.Super;
+import jlox.ast.expressions.This;
+import jlox.ast.expressions.Unary;
+import jlox.ast.expressions.Variable;
+import jlox.ast.statements.Block;
+import jlox.ast.statements.BreakStatement;
+import jlox.ast.statements.ContinueStatement;
+import jlox.ast.statements.ExpressionStatement;
+import jlox.ast.statements.IfStatement;
+import jlox.ast.statements.LoopControlStatement;
+import jlox.ast.statements.PrintStatement;
+import jlox.ast.statements.VariableStatement;
+import jlox.ast.statements.WhileStatement;
 import jlox.lexer.Token;
 import jlox.lexer.TokenType;
 
@@ -193,10 +212,31 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
     @Override
     public Void visitWhileStatement(WhileStatement statement) {
-        while (isTrue(evaluate(statement.getCondition()))) {
-            execute(statement.getBody());
+        environment.addLoop(statement.getLoopName());
+        while (isTrue(evaluate(statement.getCondition())) && environment.isLoopRunning(statement.getLoopName())) {
+            try {
+                execute(statement.getBody());
+            } catch (LoopException e) {
+                LoopControlStatement loopControlStatement = e.getStatement();
+                if (loopControlStatement.getLoopName().equals(statement.getLoopName())) {
+                    if (loopControlStatement.getClass() == BreakStatement.class) {
+                        break;
+                    }
+                }
+                throw e;
+            }
         }
 
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStatement(BreakStatement statement) {
+        throw new LoopException(statement);
+    }
+
+    @Override
+    public Void visitContinueStatement(ContinueStatement statement) {
         return null;
     }
 
@@ -289,4 +329,5 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor<
 
         return value.toString();
     }
+
 }
